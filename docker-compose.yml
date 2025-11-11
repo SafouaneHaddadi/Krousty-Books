@@ -31,6 +31,18 @@ services:
     networks:
       - library-network
 
+  frontend: 
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "4200:8080"
+    depends_on: 
+      - backend
+    networks: 
+      - library-network
+
 volumes:
   postgres-data:
 
