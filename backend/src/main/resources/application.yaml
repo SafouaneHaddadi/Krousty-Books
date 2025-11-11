@@ -16,3 +16,8 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 server:
   port: ${SERVER_PORT:8080}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info # expose health and info endpoints
