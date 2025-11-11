@@ -18,7 +18,9 @@ COPY nginx.conf /etc/nginx/nginx.conf
 #COPY --chown=nginx:nginx --from=builder /app/dist/frontend /usr/share/nginx/html
 COPY --chown=nginx:nginx --from=builder /app/dist/frontend/browser/. /usr/share/nginx/html/
 
-EXPOSE 8080
+#Faux, Nginx n'écoute pas sur 8080
+#EXPOSE 8080 
+EXPOSE 80
 
 ENTRYPOINT ["nginx", "-c", "/etc/nginx/nginx.conf"]
 CMD ["-g", "daemon off;"]
