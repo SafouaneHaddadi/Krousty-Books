@@ -1,5 +1,8 @@
 ## Krousty-Books - Bibliothèque Full Stack
 
+
+### changement de Rachid
+
 ##  Objectif du projet
 
 Cette application permet de :
