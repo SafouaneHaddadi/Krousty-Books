@@ -6,17 +6,17 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-@RestController //Dit à Spring : "Cette classe gère des requêtes HTTP". @ResponseBody automatique : Les retours deviennent du JSON
-@RequestMapping("/api/books") //Toutes les routes de ce controller commencent par /api/books
+@RestController 
+@RequestMapping("/api/books") 
 
 public class BookController {
 
     @Autowired
-    private BookService bookService; //Le Controller a besoin du Service pour la logique métier
+    private BookService bookService; 
 
     @GetMapping //GET /api/books
     public List<Book> getAllBooks() {
-        return bookService.getAllBooks(); //Controller dit : "Je ne connais pas la logique métier, je délègue au Service"
+        return bookService.getAllBooks(); // délégue la logique métier au service
     }
 
 }
