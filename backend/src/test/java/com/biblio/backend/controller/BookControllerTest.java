@@ -18,14 +18,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
-@WebMvcTest(BookController.class) // ← Test seulement le layer Web (Controller)
+@WebMvcTest(BookController.class) 
 public class BookControllerTest {
 
     @Autowired
-    private MockMvc mockmvc;   // ← Simule les requêtes HTTP
+    private MockMvc mockmvc;  
 
-    @MockBean
-    private BookService bookservice; // ← Mock du Service (comme @Mock mais pour Spring)
+    @MockBean 
+    private BookService bookservice; 
 
     @Test 
     void getAllBooks_returnCode200AndBooks_whenBooksExist() throws Exception {
@@ -42,13 +42,13 @@ public class BookControllerTest {
                  
         when(bookservice.getAllBooks()).thenReturn(expectedBooks); //vérifie que le Service a été appelé 
 
-        // ACT & ASSERT : Exécute la requête et vérifie la réponse
+        // ACT & ASSERT 
 
-        mockmvc.perform(get("/api/books")) // ← Simule GET /api/book
-        .andExpect(status().isOk())  //doit renvoyer status 200
-        .andExpect(jsonPath("$", hasSize(2)))               //dans le test du service on écrivait  assertEquals(2, actualBooks.size());
-        .andExpect(jsonPath("$[0].title", is ("Harry Potter")))                //dans le tets du service on écrivait assertEquals("Harry Potter", actualBooks.get(0).getTitle()); 
-        .andExpect(jsonPath("$[1].genre", is ("Dystopie")));   // dans le test du service on écrivait         assertEquals("Dystopie", actualBooks.get(1).getGenre());
+        mockmvc.perform(get("/api/books")) // Simule GET /api/book
+        .andExpect(status().isOk())  
+        .andExpect(jsonPath("$", hasSize(2)))              
+        .andExpect(jsonPath("$[0].title", is ("Harry Potter")))              
+        .andExpect(jsonPath("$[1].genre", is ("Dystopie")));  
         
          verify(bookservice, times(1)).getAllBooks(); //vérifie que le service a été appelé
         
@@ -64,40 +64,9 @@ public class BookControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(0))); //vérifie tableau JSON vide
 
-        verify(bookservice, times(1)).getAllBooks(); //vérifie que le service a été appelé
+        verify(bookservice, times(1)).getAllBooks(); 
 
     }
 
 }
 
-
-/* 
- 
-🎯 CE QUE CE TEST GARANTIT :
-Fonctionnement HTTP :
-
-    ✅ URL : GET /api/books répond
-
-    ✅ Status : 200 OK
-
-    ✅ Format : JSON valide
-
-    ✅ Contenu : Données correctes
-
-
-    🔧 SI LE TEST ÉCHOUE :
-    Cas 1 : Status ≠ 200
-
-    → Problème dans le Controller (exception non gérée)
-    Cas 2 : JSON mal formé
-
-    → Problème de sérialisation Jackson
-    Cas 3 : Données incorrectes
-
-    → Problème dans le Service ou le mapping
-    Cas 4 : Service non appelé
-
-    → Bug dans le Controller
-
-    Ce test est ton GARDIEN de l'API REST ! 🛡️
- */
