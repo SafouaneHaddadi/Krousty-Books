@@ -6,6 +6,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci
 
+
+# Installation de Bootstrap dans le conteneur
+RUN npm install bootstrap @popperjs/core
+
 COPY . .
 RUN npm run build -- --configuration production
 
