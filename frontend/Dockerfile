@@ -1,30 +1,41 @@
-ARG NODE_VERSION=24.7.0-alpine
+# ---------- BUILD STAGE ---------
+ARG NODE_VERSION=24-alpine
 FROM node:${NODE_VERSION} AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci
+COPY package*.json ./
+RUN npm ci
 
-
-# Installation de Bootstrap dans le conteneur
 RUN npm install bootstrap @popperjs/core
 
 COPY . .
+
+# Build production (utilisé pour le mode prod)
 RUN npm run build -- --configuration production
 
-FROM nginxinc/nginx-unprivileged:alpine3.22
+# ------- MODE DEV (pr le hot reload) ------
+FROM node:${NODE_VERSION} AS development
 
-USER nginx
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+RUN npm install bootstrap @popperjs/core
+
+COPY . .
+
+EXPOSE 4200
+
+CMD ["npx", "ng", "serve", "--host", "0.0.0.0", "--port", "4200", "--poll", "1000"]
+
+# ------ MODE PROD (Nginx) ---------
+FROM nginxinc/nginx-unprivileged:alpine-slim AS production
 
 COPY nginx.conf /etc/nginx/nginx.conf
 
-#COPY --chown=nginx:nginx --from=builder /app/dist/frontend /usr/share/nginx/html
-COPY --chown=nginx:nginx --from=builder /app/dist/frontend/browser/. /usr/share/nginx/html/
+COPY --chown=nginx:nginx --from=builder /app/dist/frontend/browser /usr/share/nginx/html
 
-#Faux, Nginx n'écoute pas sur 8080
-#EXPOSE 8080 
 EXPOSE 80
 
-ENTRYPOINT ["nginx", "-c", "/etc/nginx/nginx.conf"]
-CMD ["-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
