@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController 
 @RequestMapping("/api/books") 
 
@@ -15,7 +16,7 @@ public class BookController {
     private BookService bookService; 
 
     @GetMapping //GET /api/books
-    @CrossOrigin(origins = {"http://localhost:4200", "http://localhost"})  //Sans cette config, le navigateur bloque les appels API entre le frontend et le backend 
+    @CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8082"})  //Sans cette config, le navigateur bloque les appels API entre le frontend et le backend 
     public List<Book> getAllBooks() {
         return bookService.getAllBooks(); // délégue la logique métier au service
     }
