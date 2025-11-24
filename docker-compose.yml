@@ -29,13 +29,15 @@ services:
     networks:
       - library-network
 
-  frontend: 
+  frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: production 
     restart: unless-stopped
+
     ports:
-      - "4200:80" #nginx écoute sur le port 80 
+      - "4200:80"                                         # nginx sert les fichiers statiques
     depends_on: 
       - backend
     networks: 

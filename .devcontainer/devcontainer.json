@@ -1,0 +1,48 @@
+{
+  "name": "Library App Dev",
+  "dockerComposeFile": "docker-compose.dev.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspace/Krousty-Books",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installMaven": true,
+      "mavenVersion": "3.9.9"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "nodeGypDependencies": true
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "angular.ng-template",
+        "vmware.vscode-spring-boot",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-java-debug"
+      ]
+    }
+  },
+
+  "postCreateCommand": "sudo chmod +x /workspace/Krousty-Books/backend/mvnw && cd backend && mvn dependency:resolve && cd ../frontend && npm install --unsafe-perm && sudo chown -R vscode:vscode /workspace/Krousty-Books/frontend/.angular",
+  
+  //VS Code forward automatiquement les ports via "forwardPorts"
+  "forwardPorts": [8082, 4200, 5432],
+  "portsAttributes": {
+    "8082": {
+      "label": "Spring Boot",
+      "onAutoForward": "notify"
+    },
+    "4200": {
+      "label": "Angular Dev Server", 
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "notify"
+    }
+  }
+}
