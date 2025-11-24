@@ -1,0 +1,39 @@
+services:
+  dev:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    command: sleep infinity               # garde le conteneur actif
+    depends_on:
+      db:
+        condition: service_healthy              # attend que la DB soit healthy
+    env_file:
+      - ../.env                                 # variables d’environnement partagées
+    volumes:
+    - ../..:/workspace:cached               # monte le code source dans le conteneur
+    ports:
+      - "8082:8080"   
+      - "4200:4200"   
+      - "5432:5432"  
+    networks:
+      - dev-network
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data   # persistance des données
+    healthcheck:                                 # indique quand PostgreSQL est prêt
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dev-network
+
+volumes:
+  postgres_data:                                 # volume nommé pour la DB
+
+networks:
+  dev-network:
+    driver: bridge                               # réseau isolé entre les services (sans réseau défini, les services ne peuvent pas communiquer)
