@@ -33,21 +33,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      target: development # le conteneur lance automatiquement ng serve
-      #target : production # il continue jusqu'à l'étape production -> nginx
+      target: production 
     restart: unless-stopped
 
-    # live reload
     ports:
-      - "4200:4200"                                         # Angular dev server 
-    volumes:
-      - ./frontend:/app                            # pr que le fichier qu'on modif soit immédiatement visible dans le conteneur
-      - /app/node_modules                                   # node_modules dans le conteneur pr éviter les conflits
-
-    #  mode prod : 
-
-    # ports:
-    #   - "4200:80"                                         # Nginx sert les fichiers statique 
+      - "4200:80"                                         # nginx sert les fichiers statiques
     depends_on: 
       - backend
     networks: 
