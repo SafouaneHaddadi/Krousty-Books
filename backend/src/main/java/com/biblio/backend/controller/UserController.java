@@ -3,11 +3,13 @@ package com.biblio.backend.controller;
 import com.biblio.backend.dto.LoginRequest;
 import com.biblio.backend.dto.RegisterRequest;
 import com.biblio.backend.model.User;
+import com.biblio.backend.repository.UserRepository;
 import com.biblio.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -19,17 +21,19 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest request) {
         User user = userService.login(request.getUsername(), request.getPassword());
 
-        /* Map<String, Object> response = new HashMap<>();
+        //Customiser la réponse pr ne pas afficher le mdp
+        Map<String, Object> response = new HashMap<>();
         response.put("message", "Connexion réussie");
         response.put("username", user.getUsername());
-        response.put("userId", user.getId()); */ 
+        response.put("userId", user.getId()); 
 
-        return ResponseEntity.ok(user); //on retourne l'entité 
+        return ResponseEntity.ok(response); //on retourne la réponse 
     }
 
    @PostMapping("/register")
@@ -49,4 +53,9 @@ public class UserController {
     return ResponseEntity.ok(response);
 
 }
+
+    @GetMapping("/users")
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 }
