@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
 
+
 @RestController
 @RequestMapping("/api/books")
 
@@ -35,6 +36,16 @@ public class BookController {
 
         } catch (RuntimeException e) {
             // Si le livre n'existe pas → on renvoie 404 (Not Found)
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
+        try {
+            Book updatedBook = bookService.updateBook(id, bookDetails);
+            return ResponseEntity.ok(updatedBook);
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
