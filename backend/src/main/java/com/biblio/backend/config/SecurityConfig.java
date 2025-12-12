@@ -21,9 +21,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
 
-                // Seul admin peut supprimer
+                // Seul admin peut supprimer, modifier, créer un livre
                 .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasAuthority("ROLE_ADMIN")
-
+                .requestMatchers(HttpMethod.PUT, "/api/books/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/books").hasRole("ADMIN")
+                
                 // Tout le reste nécessite d'être authentifié
                 .anyRequest().authenticated()
             )
