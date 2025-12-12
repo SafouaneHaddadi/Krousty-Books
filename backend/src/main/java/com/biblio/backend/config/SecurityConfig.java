@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/books").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/books/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")  // ← CHANGE ÇA !
-                
+                .requestMatchers("/api/borrows/**").authenticated() // N'importe quel user connecté peut emprunter                
                 // Tout le reste nécessite d'être authentifié
                 .anyRequest().authenticated()
             )
