@@ -2,10 +2,17 @@ package com.biblio.backend.model;
 
 import jakarta.persistence.*;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 @Entity
 @Table(name = "users")
-public class User {
-    
+public class User implements UserDetails  { // Spring Security dit : "Montre-moi à quoi ressemble un user". UserDetails = contrat obligatoire
+
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -46,4 +53,27 @@ public class User {
     
     public boolean isAdmin() { return admin; }
     public void setAdmin(boolean admin) { this.admin = admin; }
+
+
+     @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() { //Quels pouvoirs a cet user ?
+        // Si admin = true → ROLE_ADMIN, sinon ROLE_USER
+        String role = admin ? "ROLE_ADMIN" : "ROLE_USER";
+        return List.of(new SimpleGrantedAuthority(role));
+    }
+
+    //Le compte n'a pas expiré
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+    
+    //Le compte n'est pas bloqué
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+    
+    //Le mdp n'a pas expiré
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+    
+    @Override
+    public boolean isEnabled() { return true; }
 }
