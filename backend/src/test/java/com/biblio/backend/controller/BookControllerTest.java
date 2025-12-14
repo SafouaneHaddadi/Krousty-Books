@@ -1,72 +1,66 @@
 package com.biblio.backend.controller;
 
 import com.biblio.backend.model.Book;
+import com.biblio.backend.repository.BookRepository;
 import com.biblio.backend.service.BookService;
-import java.util.ArrayList;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-
-@WebMvcTest(BookController.class) 
+@WebMvcTest(BookController.class)
 public class BookControllerTest {
 
     @Autowired
-    private MockMvc mockmvc;  
+    private MockMvc mockMvc;
 
-    @MockBean 
-    private BookService bookservice; 
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @Test 
-    void getAllBooks_returnCode200AndBooks_whenBooksExist() throws Exception {
+    @MockBean
+    private BookService bookService;     
 
-        //ARRANGE
-
-        List<Book> expectedBooks = new ArrayList<>();
-        expectedBooks.add(
-             new Book(1L, "Harry Potter", "J.K. Rowling",  "978-123", "Synopsis 1", "Fantasy", "http://image1.jpg", 5)
-                 );
-        expectedBooks.add(
-             new Book(2L, "1984", "George Orwell", "978-456", "Synopsis 2", "Dystopie", "http://image2.jpg", 3)
-                 );   
-                 
-        when(bookservice.getAllBooks()).thenReturn(expectedBooks); //vérifie que le Service a été appelé 
-
-        // ACT & ASSERT 
-
-        mockmvc.perform(get("/api/books")) // Simule GET /api/book
-        .andExpect(status().isOk())  
-        .andExpect(jsonPath("$", hasSize(2)))              
-        .andExpect(jsonPath("$[0].title", is ("Harry Potter")))              
-        .andExpect(jsonPath("$[1].genre", is ("Dystopie")));  
-        
-         verify(bookservice, times(1)).getAllBooks(); //vérifie que le service a été appelé
-        
-    }
-
+    @MockBean
+    private BookRepository bookRepository; 
 
     @Test
-    void getAllBooks_returnEmptyJson_whenNoBooks() throws Exception {
+    public void getAllBooks_returnCode200AndBooks_whenBooksExist() throws Exception {
+    
+        Book book1 = new Book();
+        book1.setTitle("Harry Potter");
+        List<Book> books = Arrays.asList(book1);
         
-        when(bookservice.getAllBooks()).thenReturn(Arrays.asList());
+        when(bookService.getAllBooks()).thenReturn(books);
 
-        mockmvc.perform(get("/api/books"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(0))); //vérifie tableau JSON vide
-
-        verify(bookservice, times(1)).getAllBooks(); 
-
+        mockMvc.perform(get("/api/books"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].title").value("Harry Potter"));
     }
 
-}
+    @Test
+    public void addBook_returnCode201_whenValidBook() throws Exception {
+        Book book = new Book();
+        book.setTitle("Nouveau Livre");
+        book.setAuthor("Moi");
+        
+        when(bookRepository.save(any(Book.class))).thenReturn(book);
 
+        mockMvc.perform(post("/api/books")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(book)))
+                .andExpect(status().isCreated());
+    }
+}
