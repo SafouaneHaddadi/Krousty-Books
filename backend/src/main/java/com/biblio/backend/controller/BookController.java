@@ -15,10 +15,10 @@ import java.util.List;
 public class BookController {
 
     @Autowired
-    private BookRepository bookRepository; 
+    private BookRepository bookRepository;
+    
     @Autowired
-    private BookService bookService;    
-
+    private BookService bookService;
 
     @GetMapping
     public List<Book> getAllBooks() {
@@ -34,6 +34,7 @@ public class BookController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         try {
@@ -43,4 +44,14 @@ public class BookController {
             return ResponseEntity.notFound().build();
         }
     }
-} 
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
+        try {
+            Book updatedBook = bookService.updateBook(id, bookDetails);
+            return ResponseEntity.ok(updatedBook);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+}

@@ -6,6 +6,7 @@ import com.biblio.backend.service.BookService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(BookController.class)
+@AutoConfigureMockMvc(addFilters = false) 
 public class BookControllerTest {
 
     @Autowired
@@ -31,7 +33,7 @@ public class BookControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private BookService bookService;     
+    private BookService bookService;    
 
     @MockBean
     private BookRepository bookRepository; 
@@ -55,7 +57,7 @@ public class BookControllerTest {
         Book book = new Book();
         book.setTitle("Nouveau Livre");
         book.setAuthor("Moi");
-        
+
         when(bookRepository.save(any(Book.class))).thenReturn(book);
 
         mockMvc.perform(post("/api/books")
