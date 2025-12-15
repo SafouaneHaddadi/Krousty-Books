@@ -6,6 +6,7 @@ VALUES
 ON CONFLICT (isbn) DO NOTHING;  
 
 -- Supprime et réinsère pour être sûr
+DELETE FROM reviews;
 DELETE FROM users WHERE username = 'admin';
 
 INSERT INTO users (id, username, email, password, is_admin) 

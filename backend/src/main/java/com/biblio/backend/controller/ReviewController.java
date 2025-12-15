@@ -58,4 +58,9 @@ public class ReviewController {
         List<Review> reviews = reviewRepository.findByBookId(bookId);
         return ResponseEntity.ok(reviews);
     }
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Review>> getReviewsByUser(@PathVariable Long userId) {
+        List<Review> reviews = reviewRepository.findByUserId(userId);
+        return ResponseEntity.ok(reviews);
+    }
 }
