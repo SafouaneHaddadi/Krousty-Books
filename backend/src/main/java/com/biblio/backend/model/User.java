@@ -9,6 +9,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "users")
 public class User implements UserDetails  { // Spring Security dit : "Montre-moi à quoi ressemble un user". UserDetails = contrat obligatoire
@@ -24,9 +26,11 @@ public class User implements UserDetails  { // Spring Security dit : "Montre-moi
     private String email;
     
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
     
     @Column(name = "is_admin") 
+    @JsonIgnore
     private boolean admin = false;
     
     public User() {}

@@ -6,12 +6,9 @@ VALUES
 ON CONFLICT (isbn) DO NOTHING;  
 
 -- Supprime et réinsère pour être sûr
+DELETE FROM reviews;
 DELETE FROM users WHERE username = 'admin';
 
-INSERT INTO users (username, email, password, is_admin) 
-VALUES (
-    'admin', 
-    'admin@biblio.fr', 
-    '$2a$10$R0Vhlt/dafe.IslLByhNfunQzLgcmH154mTcUPocEgn9PnOMi9giq',  
-    true
-);
+INSERT INTO users (id, username, email, password, is_admin) 
+VALUES (1, 'admin', 'admin@biblio.fr', '$2a$10$R0Vhlt/dafe.IslLByhNfunQzLgcmH154mTcUPocEgn9PnOMi9giq', true)
+ON CONFLICT (id) DO UPDATE SET username = EXCLUDED.username;
