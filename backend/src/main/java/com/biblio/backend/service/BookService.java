@@ -1,11 +1,9 @@
 package com.biblio.backend.service;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service; //BookRepository : Interface pour communiquer avec la base de données
-
 import com.biblio.backend.model.Book;
-import com.biblio.backend.repository.BookRepository;
+import com.biblio.backend.repository.BookRepository; //BookRepository : Interface pour communiquer avec la base de données
+import java.util.List;
+import org.springframework.stereotype.Service;
 
 @Service
 public class BookService {
@@ -15,6 +13,13 @@ public class BookService {
     public BookService(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
     }
+
+    public Book createBook(Book book) {
+    if (book.getStock() == null || book.getStock() <= 0) {
+        book.setStock(7);
+    }
+    return bookRepository.save(book);
+}
 
     public List<Book> getAllBooks() {
         return bookRepository.findAll(); // appel à JPA qui génère le sql
@@ -49,8 +54,9 @@ public class BookService {
         // 4. On sauvegarde
         return bookRepository.save(book);
     }
-public Book getBookById(Long id) {
-    return bookRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Livre non trouvé"));
-}
+    
+    public Book getBookById(Long id) {
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Livre non trouvé"));
+    }
 }

@@ -1,7 +1,9 @@
 package com.biblio.backend.controller;
 
+import com.biblio.backend.model.Book;
+import com.biblio.backend.repository.BookRepository;
+import com.biblio.backend.service.BookService;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +16,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.biblio.backend.model.Book;
-import com.biblio.backend.repository.BookRepository;
-import com.biblio.backend.service.BookService;
 
 @RestController
 @RequestMapping("/api/books")
@@ -38,7 +36,7 @@ public class BookController {
     @PostMapping
     public ResponseEntity<Book> addBook(@RequestBody Book book) {
         try {
-            Book newBook = bookRepository.save(book);
+            Book newBook = bookService.createBook(book);
             return new ResponseEntity<>(newBook, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
