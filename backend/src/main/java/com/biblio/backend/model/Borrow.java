@@ -2,41 +2,42 @@ package com.biblio.backend.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "borrows")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Borrow {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "book_id")
-    private Book book;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User borrower;
 
-    private LocalDate borrowDate;
-    private LocalDate dueDate;
-    private LocalDate returnDate;
+    @ManyToOne
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
-    public Book getBook() { return book; }
-    public void setBook(Book book) { this.book = book; }
-    
-    public User getBorrower() { return borrower; }
-    public void setBorrower(User borrower) { this.borrower = borrower; }
-    
-    public LocalDate getBorrowDate() { return borrowDate; }
-    public void setBorrowDate(LocalDate borrowDate) { this.borrowDate = borrowDate; }
-    
-    public LocalDate getDueDate() { return dueDate; }
-    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
-    
-    public LocalDate getReturnDate() { return returnDate; }
-    public void setReturnDate(LocalDate returnDate) { this.returnDate = returnDate; }
+    @Column(nullable = false)
+    private LocalDate borrowDate;
+
+    @Column
+    private LocalDate dueDate; // date de retour prévue (ex: +14 jours)
+
+    @Column
+    private LocalDate returnDate; // null tant que pas rendu
+
+    // Méthode utilitaire pour savoir si l'emprunt est en retard
+    public boolean isOverdue() {
+        if (returnDate != null) return false; // déjà rendu -> pas en retard
+        if (dueDate == null) return false;
+        return LocalDate.now().isAfter(dueDate);
+    }
 }
