@@ -1,0 +1,15 @@
+#  on utilise H2 en mémoire + on désactive data.sql pour éviter les erreurs ON CONFLICT
+spring:
+  datasource:
+    url: jdbc:h2:mem:library_test
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+  sql:
+    init:
+      mode: never   # <---  désactive data.sql en test (plus d'erreur avec ON CONFLICT)
