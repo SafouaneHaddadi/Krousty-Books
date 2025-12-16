@@ -1,83 +1,100 @@
 package com.biblio.backend.service;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.biblio.backend.model.Book;
 import com.biblio.backend.model.Borrow;
 import com.biblio.backend.model.User;
 import com.biblio.backend.repository.BookRepository;
 import com.biblio.backend.repository.BorrowRepository;
 import com.biblio.backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor 
 public class BorrowService {
 
     private final BorrowRepository borrowRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
 
-    public BorrowService(BorrowRepository borrowRepository, BookRepository bookRepository, UserRepository userRepository) {
-        this.borrowRepository = borrowRepository;
-        this.bookRepository = bookRepository;
-        this.userRepository = userRepository;
-    }
-
-    // Récupérer les emprunts de l'utilisateur connecté
     public List<Borrow> getMyBorrows(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-        return borrowRepository.findByBorrower(user);
+        return borrowRepository.findByBorrowerOrderByBorrowDateDesc(user);
     }
 
-    @Transactional // Important car on modifie deux tables (Borrow et Book)
+    @Transactional
     public Borrow createBorrow(Long bookId, String username) {
-        // 1. Récupérer le livre
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Livre introuvable"));
 
-        // 2. Vérifier le stock
         if (book.getStock() <= 0) {
             throw new RuntimeException("Livre indisponible (stock épuisé)");
         }
 
-        // 3. Récupérer l'utilisateur
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        // 4. Créer l'emprunt
         Borrow borrow = new Borrow();
         borrow.setBook(book);
         borrow.setBorrower(user);
         borrow.setBorrowDate(LocalDate.now());
-        
-        // 5. Décrémenter le stock et sauvegarder
+        borrow.setDueDate(LocalDate.now().plusDays(14)); // +14 jours
+
+        // décrémenter le stock
         book.setStock(book.getStock() - 1);
         bookRepository.save(book);
 
         return borrowRepository.save(borrow);
     }
-    
+
     @Transactional
-    public void returnBook(Long borrowId) {
+    public void returnBook(Long borrowId, String username) {
         Borrow borrow = borrowRepository.findById(borrowId)
                 .orElseThrow(() -> new RuntimeException("Emprunt introuvable"));
 
-        if (borrow.getReturnDate() != null) {
-            throw new RuntimeException("Livre déjà rendu !");
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        // on ne peut rendre que SON emprunt
+        if (!borrow.getBorrower().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("Vous ne pouvez rendre que vos propres emprunts");
         }
 
-        // Marquer comme rendu
+        if (borrow.getReturnDate() != null) {
+            throw new RuntimeException("Livre déjà rendu");
+        }
+
         borrow.setReturnDate(LocalDate.now());
-        
-        // Remettre le stock (+1)
+
+        // remettre +1 au stock
         Book book = borrow.getBook();
         book.setStock(book.getStock() + 1);
-        
         bookRepository.save(book);
+
         borrowRepository.save(borrow);
+    }
+
+    @Transactional
+    public void deleteBorrow(Long borrowId) {
+        Borrow borrow = borrowRepository.findById(borrowId)
+            .orElseThrow(() -> new RuntimeException("Emprunt introuvable"));
+
+        if (borrow.getReturnDate() == null) {
+            throw new RuntimeException("Impossible de supprimer un emprunt en cours");
+        }
+
+        borrowRepository.delete(borrow);
+    }
+
+    public List<Borrow> getOverdueBorrows() {
+        return borrowRepository.findAll().stream()
+            .filter(borrow -> borrow.getReturnDate() == null && borrow.isOverdue())
+            .sorted((b1, b2) -> b2.getDueDate().compareTo(b1.getDueDate())) // les plus anciens retards en haut
+            .toList();
     }
 }

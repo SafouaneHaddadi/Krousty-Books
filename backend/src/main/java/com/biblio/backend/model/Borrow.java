@@ -1,15 +1,7 @@
 package com.biblio.backend.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,16 +17,27 @@ public class Borrow {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne // Plusieurs emprunts peuvent concerner le même utilisateur
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User borrower; // L'emprunteur
+    private User borrower;
 
-    @ManyToOne // Plusieurs emprunts peuvent concerner le même livre (exemplaires différents ou temps différent)
+    @ManyToOne
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
     @Column(nullable = false)
     private LocalDate borrowDate;
 
-    private LocalDate returnDate; // Null tant que le livre n'est pas rendu
+    @Column
+    private LocalDate dueDate; // date de retour prévue (ex: +14 jours)
+
+    @Column
+    private LocalDate returnDate; // null tant que pas rendu
+
+    // Méthode utilitaire pour savoir si l'emprunt est en retard
+    public boolean isOverdue() {
+        if (returnDate != null) return false; // déjà rendu -> pas en retard
+        if (dueDate == null) return false;
+        return LocalDate.now().isAfter(dueDate);
+    }
 }
