@@ -1,22 +1,21 @@
 package com.biblio.backend.controller;
 import com.biblio.backend.dto.ReviewRequest;
-import com.biblio.backend.model.Book;
 import com.biblio.backend.model.Review;
 import com.biblio.backend.model.User;
 import com.biblio.backend.repository.BookRepository;
 import com.biblio.backend.repository.ReviewRepository;
 import com.biblio.backend.repository.UserRepository;
+import com.biblio.backend.service;
+import java.security.Principal;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.web.bind.annotation;
 
 @RestController
 @RequestMapping("/api/reviews")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8082"})
+@CrossOrigin(origins = {"http://localhost:4200/", "http://localhost:8082"})
 public class ReviewController {
 
     @Autowired
@@ -27,40 +26,27 @@ public class ReviewController {
 
     @Autowired
     private UserRepository userRepository;
-   
+
+    @Autowired
+    private ReviewService reviewService;
+
+
     @PostMapping
-    public ResponseEntity<?> addReview(@RequestBody ReviewRequest request) {
-       
-        if (request.getRating() < 1 || request.getRating() > 5) {
-            return ResponseEntity.badRequest().body("La note doit être comprise entre 1 et 5.");
+    //? = wildcard = "n’importe quel type").Ça permet de retourner soit un Review, soit une String, sans erreur de compilation
+    public ResponseEntity<?> addReview(@RequestBody ReviewRequest request, Principal principal) { //Principal = interface Java que Spring Security utilise pour représenter l'user actuellement connecté
+
+        //on vérifie que l'user est connecté
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non authentifié");
         }
 
-        Optional<Book> bookOpt = bookRepository.findById(request.getBookId());
-        if (bookOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Livre introuvable avec l'ID " + request.getBookId());
-        }
-        Optional<User> userOpt = userRepository.findById(request.getUserId());
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur introuvable avec l'ID " + request.getUserId());
-        }
-        Review review = new Review(
+        Review savedReview = reviewService.addReview(
+            request.getBookId(),
             request.getRating(),
             request.getComment(),
-            bookOpt.get(),
-            userOpt.get()
+            principal.getName()  // username de l'utilisateur connecté
         );
 
-        Review savedReview = reviewRepository.save(review);
-        return new ResponseEntity<>(savedReview, HttpStatus.CREATED);
-    }
-    @GetMapping("/book/{bookId}")
-    public ResponseEntity<List<Review>> getReviewsByBook(@PathVariable Long bookId) {
-        List<Review> reviews = reviewRepository.findByBookId(bookId);
-        return ResponseEntity.ok(reviews);
-    }
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Review>> getReviewsByUser(@PathVariable Long userId) {
-        List<Review> reviews = reviewRepository.findByUserId(userId);
-        return ResponseEntity.ok(reviews);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedReview);
     }
 }
