@@ -16,30 +16,26 @@ public class ReviewService {
 
     @Autowired
     private ReviewRepository reviewRepository;
-    
     @Autowired
     private BookRepository bookRepository;
-    
     @Autowired
     private UserRepository userRepository;
 
     public Review addReview(Long bookId, int rating, String comment, String username) {
 
-        // Validation de la note
         if (rating < 1 || rating > 5) {
             throw new IllegalArgumentException("La note doit être comprise entre 1 et 5.");
         }
 
-        // Récupération du livre
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Livre introuvable avec l'ID " + bookId));
 
-        
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        // Création et sauvegarde
         Review review = new Review(rating, comment, book, user);
+
         return reviewRepository.save(review);
     }
 }
+
