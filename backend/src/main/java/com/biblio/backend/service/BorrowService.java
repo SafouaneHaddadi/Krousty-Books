@@ -90,4 +90,11 @@ public class BorrowService {
 
         borrowRepository.delete(borrow);
     }
+
+    public List<Borrow> getOverdueBorrows() {
+        return borrowRepository.findAll().stream()
+            .filter(borrow -> borrow.getReturnDate() == null && borrow.isOverdue())
+            .sorted((b1, b2) -> b2.getDueDate().compareTo(b1.getDueDate())) // les plus anciens retards en haut
+            .toList();
+    }
 }

@@ -36,9 +36,15 @@ public class BorrowController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')") // ou dans SecurityConfig si tu préfères
+    @PreAuthorize("hasRole('ADMIN')") // ou dans SecurityConfig 
     public ResponseEntity<Void> deleteBorrow(@PathVariable Long id) {
         borrowService.deleteBorrow(id);
         return ResponseEntity.noContent().build();
-}
+    }
+
+    @GetMapping("/overdue")
+    @PreAuthorize("hasRole('ADMIN')") 
+    public List<Borrow> getOverdueBorrows() {
+        return borrowService.getOverdueBorrows();
+    }
 }
